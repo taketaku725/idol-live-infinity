@@ -1,209 +1,222 @@
 body {
   font-family: "Noto Sans JP", sans-serif;
-  background: #fff4f9;
+  background: linear-gradient(180deg, #1e0033, #000);
+  color: white;
   margin: 0;
-  color: #333;
+  padding: 0;
   overflow-x: hidden;
 }
 
-#container {
+/* レイアウト全体 */
+.container {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: flex-start;
+  width: 95%;
+  max-width: 1100px;
+  margin: 20px auto;
   gap: 20px;
-  padding: 20px;
-  flex-wrap: nowrap;
-  box-sizing: border-box;
 }
 
-/* ===== メイン ===== */
-#main {
-  flex: 2;
-  background: linear-gradient(180deg, #ffeef7, #ffd9ec);
-  padding: 20px;
-  border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  min-width: 320px;
-  box-sizing: border-box;
-}
-
-#idol {
-  text-align: center;
-}
-#idol img {
-  width: 200px;
-  border-radius: 20px;
-  transition: filter 0.5s;
-}
-
-#stats p { margin: 4px 0; }
-
-/* ===== ボタンエリア ===== */
-#buttons {
-  margin-bottom: 8px;
-  text-align: center;
-}
-#buttons button {
-  margin: 4px;
-  padding: 8px 14px;
-  border: none;
-  border-radius: 8px;
-  background: #ffb6d9;
-  color: #333;
-  font-weight: bold;
-  cursor: pointer;
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
-}
-#buttons button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 3px 0 #cc7ca6;
-}
-#buttons button:disabled {
-  opacity: 0.5;
-  cursor: default;
-  box-shadow: none;
-}
-
-/* 転生ボタン */
-.rebirth-btn {
-  padding: 8px 14px;
-  border: none;
-  border-radius: 8px;
-  background: linear-gradient(180deg, #ffd54f, #ffb300);
-  color: #333;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0 2px 0 #c69300;
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
-  margin-left: 6px;
-}
-.rebirth-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 0 #a67800;
-}
-.rebirth-btn:active {
-  transform: translateY(1px);
-  box-shadow: 0 1px 0 #875f00;
-}
-
-/* ===== メッセージ系 ===== */
-#costMessage {
-  margin-top: 4px;
-  font-size: 0.9rem;
-  color: #555;
-  font-weight: bold;
-  min-height: 1.2em;
-  text-align: center;
-}
-#message {
-  margin-top: 8px;
-  font-size: 0.95rem;
-  min-height: 1.2em;
-  text-align: center;
-}
-#eventMessage {
-  margin-top: 6px;
-  font-size: 0.9rem;
-  color: #444;
-  min-height: 1.2em;
-  text-align: center;
-}
-
-.flashMsg {
-  animation: flashText 0.25s ease;
-}
-@keyframes flashText {
-  from { opacity: 0; transform: scale(0.97); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-/* ===== ショップ ===== */
-#shop {
+/* メインゲームエリア */
+.main {
   flex: 1;
-  background: #fff;
-  padding: 16px;
-  border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  min-width: 220px;
-  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.15);
 }
-#shop h2 {
-  margin-top: 0;
+
+/* ステータス欄 */
+.status {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+/* アイドル画像 */
+#idol {
+  width: 200px;
+  height: auto;
+  display: block;
+  margin: 0 auto 10px;
+  border-radius: 12px;
+  transition: transform 0.2s ease;
+}
+
+/* ボタン */
+button {
+  background-color: #ff66cc;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 15px;
+  margin: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+button:hover {
+  background-color: #ff80d5;
+  transform: scale(1.05);
+}
+
+button:active {
+  background-color: #ff4db3;
+  transform: scale(0.97);
+}
+
+/* ショップ右側 */
+.shop {
+  width: 280px;
+  background: rgba(30, 30, 30, 0.7);
+  border-radius: 10px;
+  padding: 10px;
+  overflow-y: auto;
+  max-height: 90vh;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.1);
+}
+
+.shop h2 {
   text-align: center;
-  color: #ff4fa2;
+  color: #ff99cc;
 }
+
 .item {
   display: flex;
-  justify-content: flex-start;
   align-items: center;
+  justify-content: space-between;
   margin: 6px 0;
-  gap: 8px;
-}
-.item button {
-  padding: 6px 10px;
-  border: none;
-  border-radius: 8px;
-  background: linear-gradient(180deg, #ffd1f3, #ff9edb);
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
-}
-.item button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 0 #c568a2;
-}
-.item button:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-.priceTag {
-  font-size: 0.85rem;
-  color: #555;
-}
-.lvTag {
-  font-size: 0.85rem;
-  color: #333;
-  font-weight: bold;
+  padding: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* ===== 運バー 🍀 ===== */
+.priceTag {
+  margin-left: 10px;
+  color: #ffddee;
+}
+
+.lvTag {
+  margin-left: 10px;
+  color: #88ccff;
+}
+
+/* メッセージ欄 */
+#message {
+  margin-top: 5px;
+  font-size: 16px;
+  color: #ffffff;
+  text-shadow: 0 0 3px #000;
+  min-height: 1.2em;
+}
+
+/* 🎲 ランダムイベント履歴欄 */
+#eventMessage {
+  margin-top: 10px;
+  font-size: 15px;
+  color: #ffcc33;
+  text-shadow: 0 0 4px #000;
+  height: 120px;          /* 固定高さ */
+  overflow-y: auto;       /* スクロール可能 */
+  border: 1px solid #666;
+  border-radius: 6px;
+  padding: 5px;
+  background: rgba(20, 20, 20, 0.6);
+  display: flex;
+  flex-direction: column-reverse; /* 新しいログを上に */
+}
+
+.eventLog {
+  margin-bottom: 3px;
+  line-height: 1.3em;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* メッセージアニメーション */
+.flashMsg {
+  animation: flash 0.3s ease;
+}
+@keyframes flash {
+  0% { opacity: 0; transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* 運ゲージ */
 #luckWrapper {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 6px;
+  margin-top: 10px;
 }
+
 #luckLabelText {
-  font-weight: bold;
-  color: #4caf50;
-  font-size: 0.95rem;
-  user-select: none;
+  font-size: 16px;
+  margin-right: 6px;
 }
+
 #luckBar {
   position: relative;
-  flex: 1;
+  width: 160px;
   height: 14px;
-  background: #f1f1f1;
-  border-radius: 8px;
+  background: #333;
+  border-radius: 7px;
   overflow: hidden;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
 }
+
 #luckFill {
   height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, #9be15d, #00e3ae);
-  transition: width 0.3s ease;
-}
-#luckBar .luckLabel {
-  position: absolute;
-  top: -22px;
-  right: 0;
-  font-size: 12px;
-  color: #666;
+  background: linear-gradient(90deg, #ffd700, #ffa500);
+  border-radius: 7px;
+  transition: width 0.3s;
 }
 
-/* ===== 画面縮小対応 ===== */
-@media (max-width: 900px) { #container { transform: scale(0.9); transform-origin: top center; } }
-@media (max-width: 750px) { #container { transform: scale(0.8); } }
-@media (max-width: 600px) { #container { transform: scale(0.7); } }
-@media (max-width: 480px) { #container { transform: scale(0.6); } }
+.luckLabel {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: #fff;
+  text-shadow: 0 0 3px #000;
+}
+
+/* ステータス表示下 */
+#costMessage {
+  font-size: 14px;
+  color: #ccc;
+  min-height: 1.2em;
+  text-align: center;
+  margin-top: 6px;
+}
+
+/* 画面調整 */
+@media (max-width: 900px) {
+  .container {
+    flex-direction: column;
+    align-items: center;
+  }
+  .shop {
+    width: 95%;
+    max-height: 300px;
+  }
+}
+
+/* 転生ボタン */
+#rebirthBtn {
+  background-color: #ffcc33;
+  color: #222;
+  font-weight: bold;
+  margin-left: 8px;
+}
+
+#rebirthBtn:hover {
+  background-color: #ffdd66;
+}
