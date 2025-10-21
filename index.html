@@ -1,92 +1,79 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>アイドル成長ゲーム</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <title>アイドル育成シミュレーター</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <!-- メインエリア -->
-    <div class="main">
-      <img id="idol" src="idol.png" alt="アイドル"/>
+  <div id="container">
+    <!-- メイン画面 -->
+    <div id="main">
+      <h1>アイドル育成シミュレーター</h1>
 
-      <!-- ステータス -->
-      <div class="status" id="stats">
-        <div>💖 人気：<span id="popularity">0</span></div>
-        <div>💪 体力：<span id="stamina">10/10</span></div>
-        <div>💰 所持金：<span id="money">0</span> 円</div>
-        <div>📈 定期収入：<span id="ips">0</span> 円/s</div>
-
-        <!-- 運ゲージ -->
-        <div id="luckWrapper">
-          <span id="luckLabelText">運🍀</span>
-          <div id="luckBar">
-            <div id="luckFill"></div>
-            <span class="luckLabel">Lv.<span id="luckLv">0</span></span>
-          </div>
-        </div>
-
-        <div>🔁 転生回数：<span id="rebirthCount">0</span></div>
+      <div id="status">
+        <p>人気：<span id="popularity">0</span></p>
+        <p>体力：<span id="stamina">10/10</span></p>
+        <p>所持金：<span id="money">0</span> 円</p>
+        <p>定期収入：<span id="ips">0</span> 円/秒</p>
+        <p>転生回数：<span id="rebirthCount">0</span></p>
       </div>
 
-      <!-- アクション -->
+      <!-- 運ゲージ -->
+      <div id="luckWrapper">
+        <span id="luckLabelText">運🍀</span>
+        <div id="luckBar">
+          <div id="luckFill"></div>
+          <span class="luckLabel">Lv.<span id="luckLv">0</span></span>
+        </div>
+      </div>
+
+      <!-- 操作ボタン -->
       <div id="buttons">
         <button id="practice">練習する</button>
         <button id="live">ライブする</button>
-        <button id="rest">休憩</button>
+        <button id="rest">休憩する</button>
         <button id="rebirthBtn" style="display:none;">転生する</button>
       </div>
 
-      <!-- メッセージ -->
-      <div id="costMessage">　</div>
-      <div id="message">今日もがんばるよっ！</div>
+      <p id="costMessage">　</p>
+      <p id="message">ここにメッセージが表示されます</p>
+      <p id="eventMessage"></p>
 
-      <!-- ランダムイベント履歴（固定高・スクロール） -->
-      <div id="eventMessage" class="event-log-area"></div>
+      <img src="idol.png" id="idol" alt="アイドル画像">
     </div>
 
-    <!-- ショップ -->
-    <aside class="shop" id="shop">
+    <!-- ショップ画面 -->
+    <div id="shop">
       <h2>ショップ</h2>
-
       <div class="item" id="practiceItem">
-        <button id="buyPractice">練習強化</button>
+        <button>練習強化</button>
       </div>
-
       <div class="item" id="liveItem">
-        <button id="buyLive">ライブ強化</button>
+        <button>ライブ強化</button>
       </div>
-
-      <div class="item" id="streamItem" style="display:none;">
-        <button id="buyStream">配信活動</button>
-      </div>
-
-      <div class="item" id="goodsItem" style="display:none;">
-        <button id="buyGoods">グッズ販売</button>
-      </div>
-
-      <div class="item" id="fanclubItem" style="display:none;">
-        <button id="buyFanclub">ファンクラブ</button>
-      </div>
-
-      <div class="item" id="adItem" style="display:none;">
-        <button id="buyAd">広告契約</button>
-      </div>
-
-      <div class="item" id="sponsorItem" style="display:none;">
-        <button id="buySponsor">スポンサー契約</button>
-      </div>
-
-      <div class="item" id="luckItem" style="display:none;">
-        <button id="buyLuck">運アップ</button>
-      </div>
-
       <div class="item" id="staminaItem">
-        <button id="buyStamina">体力アップ</button>
+        <button>体力アップ</button>
       </div>
-    </aside>
+      <div class="item" id="streamItem" style="display:none;">
+        <button>配信活動</button>
+      </div>
+      <div class="item" id="luckItem" style="display:none;">
+        <button>運アップ</button>
+      </div>
+      <div class="item" id="goodsItem" style="display:none;">
+        <button>グッズ販売</button>
+      </div>
+      <div class="item" id="fanclubItem" style="display:none;">
+        <button>ファンクラブ</button>
+      </div>
+      <div class="item" id="adItem" style="display:none;">
+        <button>広告契約</button>
+      </div>
+      <div class="item" id="sponsorItem" style="display:none;">
+        <button>スポンサー契約</button>
+      </div>
+    </div>
   </div>
 
   <script src="main.js"></script>
