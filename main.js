@@ -23,7 +23,7 @@ let lastRebirthBonus = 0;
 
 const MAX_LUCK = 10000;
 
-// ====== 要素 ======
+// ====== 要素取得（ID一致が超重要） ======
 const popDisplay = document.getElementById("popularity");
 const staDisplay = document.getElementById("stamina");
 const moneyDisplay = document.getElementById("money");
@@ -31,10 +31,8 @@ const ipsDisplay = document.getElementById("ips");
 const message = document.getElementById("message");
 const eventMessage = document.getElementById("eventMessage");
 const costDisplay = document.getElementById("costMessage");
-
 const rebirthBtn = document.getElementById("rebirthBtn");
 const rebirthCountDisplay = document.getElementById("rebirthCount");
-
 const luckFill = document.getElementById("luckFill");
 const luckLvDisplay = document.getElementById("luckLv");
 
@@ -50,7 +48,7 @@ const shopItems = {
   stamina: document.getElementById("staminaItem")
 };
 
-// ====== 共通関数 ======
+// ====== 共通関数（安全化） ======
 function getPrice(base, level, mult = 1.3) {
   return Math.floor(base * Math.pow(mult, level));
 }
@@ -58,13 +56,17 @@ function applyInflation(value) {
   return value * (1 + inflationTotal);
 }
 function formatNumber(num) {
-  return Math.floor(num).toLocaleString();
+  if (isNaN(num) || !isFinite(num)) return "0";
+  return Math.round(num).toLocaleString("ja-JP");
+}
+function clamp(n, min, max) {
+  return Math.max(min, Math.min(max, n));
 }
 
 // ====== メッセージ表示 ======
 function setMessage(text) {
   message.classList.remove("flashMsg");
-  void message.offsetWidth;
+  void message.offsetWidth; // reflow for animation
   message.textContent = text;
   message.classList.add("flashMsg");
 }
@@ -72,19 +74,18 @@ function setMessage(text) {
 // ====== 練習 ======
 document.getElementById("practice").onclick = () => {
   const cost = Math.floor(1 + (practiceLevel - 1) * 0.2);
-  if (stamina < cost) {
-    setMessage("体力が足りないよ…");
-    return;
-  }
+  if (stamina < cost) { setMessage("体力が足りないよ…"); return; }
+
   const gainMoney = Math.floor(applyInflation(10 * practiceLevel));
   money += gainMoney;
-  stamina -= cost;
+
+  stamina = clamp(stamina - cost, 0, maxStamina);
   practiceCount++;
-  setMessage(`練習して +${formatNumber(gainMoney)}円！（体力 -${cost}）`);
+  setMessage(`練習して +${formatNumber(gainMoney)}円！（体力 -${formatNumber(cost)}）`);
 
   if (practiceCount % 10 === 0) {
     maxStamina += 5;
-    setMessage(`💪 練習で成長！最大体力 +5✨（今: ${maxStamina}）`);
+    setMessage(`💪 練習で成長！最大体力 +5✨（今: ${formatNumber(maxStamina)}）`);
   }
   update();
 };
@@ -92,92 +93,111 @@ document.getElementById("practice").onclick = () => {
 // ====== ライブ ======
 document.getElementById("live").onclick = () => {
   const cost = Math.floor(20 + (liveLevel - 1) * 1.5);
-  if (stamina < cost) {
-    setMessage("体力がないとステージは無理だよ〜");
-    return;
-  }
+  if (stamina < cost) { setMessage("体力がないとステージは無理だよ〜"); return; }
+
   const sales = Math.floor(applyInflation((20 + popularity * 1.2) * liveLevel));
   const popGain = 10 * liveLevel;
   money += sales;
   popularity += popGain;
-  stamina -= cost;
-  setMessage(`ライブ成功！売上 +${formatNumber(sales)}円✨ 人気 +${formatNumber(popGain)}（体力 -${cost}）`);
+
+  stamina = clamp(stamina - cost, 0, maxStamina);
+  setMessage(`ライブ成功！売上 +${formatNumber(sales)}円✨ 人気 +${formatNumber(popGain)}（体力 -${formatNumber(cost)}）`);
   update();
 };
 
 // ====== 休憩 ======
 document.getElementById("rest").onclick = () => {
-  if (stamina >= maxStamina) {
-    setMessage("もう元気いっぱいだよ！");
-    return;
-  }
+  if (stamina >= maxStamina) { setMessage("もう元気いっぱいだよ！"); return; }
+
   stamina = maxStamina;
   const lostPop = Math.min(2 + Math.floor(popularity / 100), popularity);
   const lostMoney = Math.min(5 + Math.floor(popularity / 50), money);
   popularity -= lostPop;
   money -= lostMoney;
+
   setMessage(`休憩して全回復！人気 -${formatNumber(lostPop)}・お金 -${formatNumber(lostMoney)}円`);
   update();
 };
 
-// ====== 必要体力表示 ======
+// ====== 必要体力（ホバー表示） ======
 document.getElementById("practice").onmouseenter = () => {
   const cost = Math.floor(1 + (practiceLevel - 1) * 0.2);
-  costDisplay.textContent = `必要体力：${cost}`;
+  costDisplay.textContent = `必要体力：${formatNumber(cost)}`;
 };
 document.getElementById("live").onmouseenter = () => {
   const cost = Math.floor(20 + (liveLevel - 1) * 1.5);
-  costDisplay.textContent = `必要体力：${cost}`;
+  costDisplay.textContent = `必要体力：${formatNumber(cost)}`;
 };
 ["practice", "live", "rest"].forEach(id => {
   document.getElementById(id).onmouseleave = () => costDisplay.textContent = "　";
 });
 
-// ====== 運ゲージ更新 ======
+// ====== 運ゲージ ======
 function updateLuckBar() {
   const ratio = Math.min(1, luckLevel / MAX_LUCK);
-  luckFill.style.width = `${ratio * 100}%`;
-  luckLvDisplay.textContent = luckLevel;
+  luckFill.style.width = `${(ratio * 100).toFixed(2)}%`;
+  luckLvDisplay.textContent = formatNumber(luckLevel);
 }
 
 // ====== ショップ購入 ======
 function buyUpgrade(type, baseCost, level) {
   const cost = getPrice(baseCost, level);
-  if (money < cost) {
-    setMessage(`お金が足りない…（必要：${formatNumber(cost)}円）`);
-    return;
-  }
-  if (type === "luck" && luckLevel >= MAX_LUCK) {
-    setMessage("🍀 これ以上は天運の極み！");
-    return;
-  }
+  if (money < cost) { setMessage(`お金が足りない…（必要：${formatNumber(cost)}円）`); return; }
+  if (type === "luck" && luckLevel >= MAX_LUCK) { setMessage("🍀 これ以上は天運の極み！"); return; }
 
   money -= cost;
+
   switch (type) {
-    case "practice": practiceLevel++; setMessage(`練習Lv${practiceLevel}にアップ！`); break;
-    case "live": liveLevel++; setMessage(`ライブLv${liveLevel}にアップ！`); break;
-    case "stream": streamLevel++; passiveIncome += Math.floor(applyInflation(80 + streamLevel * 10)); break;
-    case "goods": goodsLevel++; passiveIncome += Math.floor(applyInflation(150 + goodsLevel * 20)); break;
-    case "fanclub": fanclubLevel++; passiveIncome += Math.floor(applyInflation(500 + fanclubLevel * 40)); break;
-    case "ad": adLevel++; passiveIncome += Math.floor(applyInflation(1500 + adLevel * 100)); break;
-    case "sponsor": sponsorLevel++; passiveIncome += Math.floor(applyInflation(6000 + sponsorLevel * 250)); break;
+    case "practice":
+      practiceLevel++;
+      setMessage(`練習Lv${formatNumber(practiceLevel)}にアップ！`);
+      break;
+    case "live":
+      liveLevel++;
+      setMessage(`ライブLv${formatNumber(liveLevel)}にアップ！`);
+      break;
+    case "stream":
+      streamLevel++;
+      passiveIncome += Math.floor(applyInflation(80 + streamLevel * 10));
+      setMessage(`配信Lv${formatNumber(streamLevel)} +定期収入UP`);
+      break;
+    case "goods":
+      goodsLevel++;
+      passiveIncome += Math.floor(applyInflation(150 + goodsLevel * 20));
+      setMessage(`グッズLv${formatNumber(goodsLevel)} +定期収入UP`);
+      break;
+    case "fanclub":
+      fanclubLevel++;
+      passiveIncome += Math.floor(applyInflation(500 + fanclubLevel * 40));
+      setMessage(`ファンクラブLv${formatNumber(fanclubLevel)} +定期収入UP`);
+      break;
+    case "ad":
+      adLevel++;
+      passiveIncome += Math.floor(applyInflation(1500 + adLevel * 100));
+      setMessage(`広告Lv${formatNumber(adLevel)} +定期収入UP`);
+      break;
+    case "sponsor":
+      sponsorLevel++;
+      passiveIncome += Math.floor(applyInflation(6000 + sponsorLevel * 250));
+      setMessage(`スポンサーLv${formatNumber(sponsorLevel)} +定期収入UP`);
+      break;
     case "luck":
-      luckLevel++;
-      if (luckLevel > MAX_LUCK) luckLevel = MAX_LUCK;
-      setMessage(`運Lv${luckLevel}🍀 上昇！`);
+      luckLevel = Math.min(MAX_LUCK, luckLevel + 1);
+      setMessage(`運Lv${formatNumber(luckLevel)}🍀 上昇！`);
       updateLuckBar();
       break;
     case "stamina":
       staminaLevel++;
       const gain = 10 + staminaLevel * 2;
       maxStamina += gain;
-      setMessage(`体力Lv${staminaLevel}💪 最大体力 +${gain}`);
+      setMessage(`体力Lv${formatNumber(staminaLevel)} 最大体力 +${formatNumber(gain)}`);
       break;
   }
+
   update();
 }
 
-// ====== ショップ更新（リアルタイム反映） ======
+// ====== ショップ表示・可否制御（disabled未使用） ======
 function updatePrices() {
   const list = [
     ["practice", 500, practiceLevel],
@@ -194,29 +214,28 @@ function updatePrices() {
   list.forEach(([key, base, lv]) => {
     const item = shopItems[key];
     if (!item || item.style.display === "none") return;
+
     const price = getPrice(base, lv);
     const btn = item.querySelector("button");
+
+    // ラベル生成
     let priceTag = item.querySelector(".priceTag");
     let lvTag = item.querySelector(".lvTag");
-    if (!priceTag) {
-      priceTag = document.createElement("span");
-      priceTag.className = "priceTag";
-      item.appendChild(priceTag);
-    }
-    if (!lvTag) {
-      lvTag = document.createElement("span");
-      lvTag.className = "lvTag";
-      item.appendChild(lvTag);
-    }
+    if (!priceTag) { priceTag = document.createElement("span"); priceTag.className = "priceTag"; item.appendChild(priceTag); }
+    if (!lvTag) { lvTag = document.createElement("span"); lvTag.className = "lvTag"; item.appendChild(lvTag); }
+
     priceTag.textContent = `${formatNumber(price)}円`;
-    lvTag.textContent = `Lv.${lv}`;
+    lvTag.textContent = `Lv.${formatNumber(lv)}`;
 
+    // 可否判定（運は上限チェック）
     const maxed = key === "luck" && luckLevel >= MAX_LUCK;
-    const cantBuy = money < price || maxed;
+    const cantBuy = (money < price) || maxed;
 
+    // 見た目だけ暗く
     btn.style.filter = cantBuy ? "brightness(0.7)" : "brightness(1)";
     btn.style.cursor = cantBuy ? "not-allowed" : "pointer";
 
+    // クリック再登録（毎回最新の価格とレベルで判定）
     btn.onclick = () => {
       if (cantBuy) {
         if (maxed) setMessage("🍀 これ以上は天運の極み！");
@@ -228,7 +247,7 @@ function updatePrices() {
   });
 }
 
-// ====== 解放条件（転生ボタン追加） ======
+// ====== 解放条件（人気に応じて）＋ 転生ボタン表示 ======
 function checkUnlocks() {
   if (popularity >= 1000 && shopItems.stream.style.display === "none") {
     shopItems.stream.style.display = "flex";
@@ -252,22 +271,18 @@ function checkUnlocks() {
     setMessage("🤝 スポンサー契約が解放された！");
   }
 
-  // 🌟 転生ボタン解放
-  if (popularity >= 10000) {
-    rebirthBtn.style.display = "inline-block";
-  } else {
-    rebirthBtn.style.display = "none";
-  }
+  // 転生ボタン解放
+  rebirthBtn.style.display = popularity >= 10000 ? "inline-block" : "none";
 }
 
-// ====== 🎲 ランダムイベント（履歴付き・スクロール可能） ======
+// ====== ランダムイベント（履歴つき） ======
 function tryRandomEvent() {
-  // 運Lv0で約5分に1回、運LvMAXで約5秒に1回
+  // 運Lv0で約5分に1回、運MAXで約5秒に1回目安
   const baseChance = 1 / (60 * (300 - (luckLevel / MAX_LUCK) * (300 - 5)));
   if (Math.random() < baseChance) {
-    const rewardType = Math.random();
+    const r = Math.random();
     let msg;
-    if (rewardType < 0.5) {
+    if (r < 0.5) {
       const gain = Math.floor(applyInflation(500 + Math.random() * 500));
       money += gain;
       msg = `💸 ラッキー！臨時収入 +${formatNumber(gain)}円✨`;
@@ -277,13 +292,13 @@ function tryRandomEvent() {
       msg = `🎉 話題沸騰！人気 +${formatNumber(gain)}✨`;
     }
 
-    // 履歴の先頭に追加（上に積み重なる）
+    // 履歴の先頭に追加（新しい順）
     const log = document.createElement("div");
     log.textContent = msg;
     log.className = "eventLog";
     eventMessage.prepend(log);
 
-    // 古い履歴を削除（100件上限）
+    // 古すぎ防止
     if (eventMessage.children.length > 100) {
       eventMessage.removeChild(eventMessage.lastChild);
     }
@@ -293,24 +308,40 @@ function tryRandomEvent() {
 }
 
 // ====== 転生 ======
-function calcRebirthBonus(pop) { return Math.max(0.10, Number((pop / 100000).toFixed(2))); }
+function calcRebirthBonus(pop) {
+  return Math.max(0.10, Number((pop / 100000).toFixed(2)));
+}
 function doRebirth() {
   if (popularity < 10000) return;
   if (!confirm("本当に転生しますか？")) return;
+
   const bonus = calcRebirthBonus(popularity);
   const add = Math.max(bonus, lastRebirthBonus);
   inflationTotal += add;
   lastRebirthBonus = add;
   rebirthCount++;
 
-  popularity = 0; money = 0; stamina = 10; maxStamina = 10;
-  practiceLevel = liveLevel = 1;
-  adLevel = sponsorLevel = goodsLevel = fanclubLevel = streamLevel = luckLevel = staminaLevel = 0;
-  passiveIncome = 0; practiceCount = 0;
+  // 全リセット（倍率は保持）
+  popularity = 0;
+  money = 0;
+  stamina = 10;
+  maxStamina = 10;
 
+  practiceLevel = 1;
+  liveLevel = 1;
+  adLevel = sponsorLevel = goodsLevel = fanclubLevel = streamLevel = luckLevel = staminaLevel = 0;
+  passiveIncome = 0;
+  practiceCount = 0;
+
+  // 店の再ロック
   Object.values(shopItems).forEach(i => {
-    if (i.id !== "practiceItem" && i.id !== "liveItem" && i.id !== "staminaItem") i.style.display = "none";
+    if (i.id !== "practiceItem" && i.id !== "liveItem" && i.id !== "staminaItem") {
+      i.style.display = "none";
+    }
   });
+
+  // イベント履歴も軽くクリア（重かったら）
+  while (eventMessage.children.length > 50) eventMessage.removeChild(eventMessage.lastChild);
 
   setMessage(`🔁転生完了！倍率 +${add.toFixed(2)}（累計 ×${(1 + inflationTotal).toFixed(2)}）`);
   update();
@@ -319,23 +350,30 @@ rebirthBtn.onclick = doRebirth;
 
 // ====== UI更新 ======
 function update() {
+  // 表示の安全更新
   popDisplay.textContent = formatNumber(popularity);
-  staDisplay.textContent = `${stamina}/${maxStamina}`;
+  staDisplay.textContent = `${formatNumber(stamina)}/${formatNumber(maxStamina)}`;
   moneyDisplay.textContent = formatNumber(money);
   ipsDisplay.textContent = formatNumber(passiveIncome);
-  rebirthCountDisplay.textContent = rebirthCount;
+  rebirthCountDisplay.textContent = formatNumber(rebirthCount);
+
   updateLuckBar();
   updatePrices();
   checkUnlocks();
 }
 
-// ====== メインループ ======
+// ====== ループ ======
 let last = performance.now();
 function loop(t) {
   const dt = (t - last) / 1000;
   last = t;
+
+  // 定期収入
   money += passiveIncome * dt;
+
+  // ランダムイベント試行（フレームごとに薄く）
   if (Math.random() < 0.002) tryRandomEvent();
+
   update();
   requestAnimationFrame(loop);
 }
